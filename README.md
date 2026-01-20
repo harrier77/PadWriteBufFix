@@ -1,5 +1,7 @@
 # PadWriteBufFix
 
+![demo](./demo.png)
+
 This project: https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/Win7Samples/multimedia/DirectWrite/PadWrite
 cannot be built or run in Visual Studio 2026 with the Windows 10 SDK and C++14.
 
