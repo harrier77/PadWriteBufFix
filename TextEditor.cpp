@@ -267,12 +267,6 @@ void TextEditor::SetRenderTarget(RenderTarget* target)
 }
 
 
-void TextEditor::OnDestroy()
-{
-    SafeRelease(&renderTarget_);
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // Message dispatch.
 
@@ -306,9 +300,8 @@ LRESULT CALLBACK TextEditor::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
 
     case WM_ERASEBKGND: // don't want flicker
         return true;
-
     case WM_DESTROY:
-        window->OnDestroy();
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, NULL);
         break;
 
     case WM_NCDESTROY:
@@ -340,7 +333,28 @@ LRESULT CALLBACK TextEditor::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
     case WM_CAPTURECHANGED:
         window->OnMouseExit();
         break;
+    case WM_IME_STARTCOMPOSITION:
+    {
+        if (HIMC himc = ImmGetContext(hwnd))
+        {
+            D2D1::Matrix3x2F pageTransform;
+            window->GetViewMatrix(&Cast(pageTransform));
 
+            RectF caretRect;
+            window->GetCaretRect(caretRect);
+            POINT pt{ caretRect.left+pageTransform.dx, caretRect.top+pageTransform.dy };
+            
+            COMPOSITIONFORM comp{};
+            comp.dwStyle = CFS_FORCE_POSITION;
+            comp.ptCurrentPos = pt;
+            ImmSetCompositionWindow(himc, &comp);
+            CANDIDATEFORM cand{};
+            cand.dwStyle = CFS_CANDIDATEPOS;
+            cand.ptCurrentPos = pt;
+            ImmSetCandidateWindow(himc, &cand);
+            ImmReleaseContext(hwnd, himc);
+        }
+    }
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
     case WM_MBUTTONUP:

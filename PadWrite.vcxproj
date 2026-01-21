@@ -127,7 +127,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d2d1.lib;WindowsCodecs.lib;ole32.lib;gdi32.lib;user32.lib;DWrite.lib;uuid.lib;msimg32.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;WindowsCodecs.lib;ole32.lib;gdi32.lib;user32.lib;DWrite.lib;uuid.lib;msimg32.lib;propsys.lib;shlwapi.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <ManifestFile />
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -168,7 +168,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d2d1.lib;WindowsCodecs.lib;ole32.lib;gdi32.lib;user32.lib;DWrite.lib;uuid.lib;msimg32.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;WindowsCodecs.lib;ole32.lib;gdi32.lib;user32.lib;DWrite.lib;uuid.lib;msimg32.lib;propsys.lib;shlwapi.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <ManifestFile />
       <GenerateDebugInformation>true</GenerateDebugInformation>

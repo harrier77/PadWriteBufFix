@@ -326,12 +326,6 @@ LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
         window->OnDestroy();
         break;
 
-    case WM_NCDESTROY:
-        // Remove implicit reference via HWND.
-        // After this, the window and data structure no longer exist.
-        window->Release();
-        break;
-
     case WM_SETFOCUS:
         // Forward focus to the text editor.
         if (window->textEditor_ != NULL)
@@ -500,6 +494,8 @@ void MainWindow::OnDestroy()
 {
     SafeRelease(&textEditor_);
     SafeRelease(&renderTarget_);
+    renderTarget_ = nullptr;
+    textEditor_ = nullptr;
 }
 
 
