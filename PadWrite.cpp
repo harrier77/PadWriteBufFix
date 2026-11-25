@@ -40,10 +40,10 @@ const static wchar_t g_sampleText[] =
 // Main entry.
 
 int APIENTRY wWinMain(
-    HINSTANCE   hInstance, 
-    HINSTANCE   hPrevInstance,
-    LPWSTR      commandLine,
-    int         nCmdShow
+    HINSTANCE   /*hInstance*/, 
+    HINSTANCE   /*hPrevInstance*/,
+    LPWSTR      /*commandLine*/,
+    int         /*nCmdShow*/
     )
 {
     // The Microsoft Security Development Lifecycle recommends that all
@@ -76,12 +76,12 @@ int APIENTRY wWinMain(
 
 
 MainWindow::MainWindow()
-:   renderTargetType_(RenderTargetTypeD2D),
-    hwnd_(NULL),
+:   hwnd_(NULL),
     dwriteFactory_(),
     wicFactory_(),
     d2dFactory_(),
     renderTarget_(),
+    renderTargetType_(RenderTargetTypeD2D),
     textEditor_(),
     inlineObjectImages_()
 {
@@ -260,6 +260,7 @@ HRESULT MainWindow::CreateRenderTarget(HWND hwnd, RenderTargetType renderTargetT
             break;
         }
         // Fall through to DirectWrite if no D2D factory exists.
+        [[fallthrough]];
 
     case RenderTargetTypeDW:
     default:

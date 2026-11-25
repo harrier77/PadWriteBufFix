@@ -52,12 +52,12 @@ HRESULT RenderTargetD2D::Create(ID2D1Factory* d2dFactory, IDWriteFactory* dwrite
 
 
 RenderTargetD2D::RenderTargetD2D(ID2D1Factory* d2dFactory, IDWriteFactory* dwriteFactory, HWND hwnd)
-:   hwnd_(hwnd),
-    hmonitor_(NULL),
+:   dwriteFactory_(SafeAcquire(dwriteFactory)),
     d2dFactory_(SafeAcquire(d2dFactory)),
-    dwriteFactory_(SafeAcquire(dwriteFactory)),
     target_(),
-    brush_()
+    brush_(),
+    hwnd_(hwnd),
+    hmonitor_(NULL)
 {
 }
 
@@ -166,7 +166,7 @@ void RenderTargetD2D::EndDraw()
     HRESULT hr = target_->EndDraw();
 
     // If the device is lost for any reason, we need to recreate it.
-    if (hr == D2DERR_RECREATE_TARGET)
+    if (hr == static_cast<HRESULT>(D2DERR_RECREATE_TARGET))
     {
         // Flush resources and recreate them.
         // This is very rare for a device to be lost,
@@ -250,8 +250,7 @@ void RenderTargetD2D::DrawImage(
 {
     // Ignore zero size source rects.
     // Draw nothing if the destination is zero size.
-    if (&sourceRect    == NULL
-    || sourceRect.left >= sourceRect.right
+    if (sourceRect.left >= sourceRect.right
     || sourceRect.top  >= sourceRect.bottom
     || destRect.left   >= destRect.right
     || destRect.top    >= destRect.bottom)
@@ -331,7 +330,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetD2D::DrawGlyphRun(
     FLOAT baselineOriginY,
     DWRITE_MEASURING_MODE measuringMode,
     const DWRITE_GLYPH_RUN* glyphRun,
-    const DWRITE_GLYPH_RUN_DESCRIPTION* glyphRunDescription,
+    const DWRITE_GLYPH_RUN_DESCRIPTION* /*glyphRunDescription*/,
     IUnknown* clientDrawingEffect
     )
 {
@@ -428,8 +427,8 @@ HRESULT STDMETHODCALLTYPE RenderTargetD2D::DrawInlineObject(
     FLOAT originX,
     FLOAT originY,
     IDWriteInlineObject* inlineObject,
-    BOOL isSideways,
-    BOOL isRightToLeft,
+    BOOL /*isSideways*/,
+    BOOL /*isRightToLeft*/,
     IUnknown* clientDrawingEffect
     )
 {
@@ -456,7 +455,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetD2D::DrawInlineObject(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetD2D::IsPixelSnappingDisabled(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT BOOL* isDisabled
     )
 {
@@ -468,7 +467,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetD2D::IsPixelSnappingDisabled(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetD2D::GetCurrentTransform(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT DWRITE_MATRIX* transform
     )
 {
@@ -479,7 +478,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetD2D::GetCurrentTransform(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetD2D::GetPixelsPerDip(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT FLOAT* pixelsPerDip
     )
 {
@@ -519,12 +518,13 @@ HRESULT RenderTargetDW::Create(IDWriteFactory* dwriteFactory, HWND hwnd, OUT Ren
 
 
 RenderTargetDW::RenderTargetDW(IDWriteFactory* dwriteFactory, HWND hwnd)
-:   hwnd_(hwnd),
-    hmonitor_(NULL),
-    dwriteFactory_(SafeAcquire(dwriteFactory)),
+:   dwriteFactory_(SafeAcquire(dwriteFactory)),
     gdiInterop_(),
+    target_(),
     renderingParams_(),
-    target_()
+    hwnd_(hwnd),
+    memoryHdc_(NULL),
+    hmonitor_(NULL)
 {
 }
 
@@ -685,20 +685,14 @@ HBITMAP RenderTargetDW::GetCachedImage(IWICBitmapSource* image)
         return NULL;
 
     // Initialize bitmap information.
-    BITMAPINFO bmi = {
-        sizeof(BITMAPINFOHEADER),   // biSize
-        width,                      // biWidth
-        -int(height),               // biHeight
-        1,                          // biPlanes
-        32,                         // biBitCount
-        BI_RGB,                     // biCompression
-        pixelBufferSize,            // biSizeImage
-        1,                          // biXPelsPerMeter
-        1,                          // biYPelsPerMeter
-        0,                          // biClrUsed
-        0,                          // biClrImportant
-        0                           // RGB QUAD
-    };
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth       = static_cast<LONG>(width);
+    bmi.bmiHeader.biHeight      = -static_cast<LONG>(height);
+    bmi.bmiHeader.biPlanes      = 1;
+    bmi.bmiHeader.biBitCount    = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+    bmi.bmiHeader.biSizeImage   = pixelBufferSize;
 
     HBITMAP bitmap = CreateCompatibleBitmap(memoryHdc_, width, height);
     if (bitmap == NULL)
@@ -767,8 +761,7 @@ void RenderTargetDW::DrawImage(
 {
     // Ignore zero size source rects.
     // Draw nothing if the destination is zero size.
-    if (&sourceRect == NULL
-    || sourceRect.left >= sourceRect.right
+    if (sourceRect.left >= sourceRect.right
     || sourceRect.top  >= sourceRect.bottom
     || destRect.left   >= destRect.right
     || destRect.top    >= destRect.bottom)
@@ -850,7 +843,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetDW::DrawGlyphRun(
     FLOAT baselineOriginY,
     DWRITE_MEASURING_MODE measuringMode,
     const DWRITE_GLYPH_RUN* glyphRun,
-    const DWRITE_GLYPH_RUN_DESCRIPTION* glyphRunDescription,
+    const DWRITE_GLYPH_RUN_DESCRIPTION* /*glyphRunDescription*/,
     IUnknown* clientDrawingEffect
     )
 {
@@ -973,8 +966,8 @@ HRESULT STDMETHODCALLTYPE RenderTargetDW::DrawInlineObject(
     FLOAT originX,
     FLOAT originY,
     IDWriteInlineObject* inlineObject,
-    BOOL isSideways,
-    BOOL isRightToLeft,
+    BOOL /*isSideways*/,
+    BOOL /*isRightToLeft*/,
     IUnknown* clientDrawingEffect
     )
 {
@@ -1001,7 +994,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetDW::DrawInlineObject(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetDW::IsPixelSnappingDisabled(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT BOOL* isDisabled
     )
 {
@@ -1013,7 +1006,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetDW::IsPixelSnappingDisabled(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetDW::GetCurrentTransform(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT DWRITE_MATRIX* transform
     )
 {
@@ -1024,7 +1017,7 @@ HRESULT STDMETHODCALLTYPE RenderTargetDW::GetCurrentTransform(
 
 
 HRESULT STDMETHODCALLTYPE RenderTargetDW::GetPixelsPerDip(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     OUT FLOAT* pixelsPerDip
     )
 {

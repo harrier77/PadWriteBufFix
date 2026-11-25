@@ -26,7 +26,7 @@ InlineImage::InlineImage(
     if (image != NULL)
         image->GetSize(&imageWidth, &imageHeight);
 
-    if (index == ~0)
+    if (index == UINT_MAX)
     {
         // No index. Use entire image.
         rect_.left      = 0;
@@ -50,13 +50,13 @@ InlineImage::InlineImage(
 
 
 HRESULT STDMETHODCALLTYPE InlineImage::Draw(
-    void* clientDrawingContext,
+    void* /*clientDrawingContext*/,
     IDWriteTextRenderer* renderer,
     FLOAT originX,
     FLOAT originY,
-    BOOL isSideways,
-    BOOL isRightToLeft,
-    IUnknown* clientDrawingEffect
+    BOOL /*isSideways*/,
+    BOOL /*isRightToLeft*/,
+    IUnknown* /*clientDrawingEffect*/
     )
 {
     // Go from the text renderer interface back to the actual render target.

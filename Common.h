@@ -95,7 +95,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // Ignore unreferenced parameters, since they are very common
 // when implementing callbacks.
+#ifdef _MSC_VER
 #pragma warning(disable : 4100)
+#endif
 
 
 ////////////////////////////////////////
@@ -303,3 +305,33 @@ public:
         *ppObject = static_cast<InterfaceName*>(this);
     }
 };
+
+// MinGW-w64: provide __mingw_uuidof specializations for DECLSPEC_UUID classes.
+// MSVC resolves __uuidof via DECLSPEC_UUID metadata; MinGW needs explicit mappings.
+#if defined(__MINGW32__)
+class DrawingEffect;
+class InlineImage;
+class RenderTarget;
+class TextEditor;
+
+template<> inline const GUID& __mingw_uuidof<DrawingEffect>()
+{
+    static const GUID g = {0x1CD7C44Fu, 0x526Bu, 0x492Au, {0xB7, 0x80, 0xEF, 0x9C, 0x41, 0x59, 0xB6, 0x53}};
+    return g;
+}
+template<> inline const GUID& __mingw_uuidof<InlineImage>()
+{
+    static const GUID g = {0x1DE84D4Eu, 0x1AD2u, 0x40ECu, {0x82, 0xB3, 0x1B, 0x5B, 0x93, 0x47, 0x1C, 0x65}};
+    return g;
+}
+template<> inline const GUID& __mingw_uuidof<RenderTarget>()
+{
+    static const GUID g = {0x4327AC14u, 0x3172u, 0x4807u, {0xBF, 0x40, 0x02, 0xC7, 0x47, 0x5A, 0x25, 0x20}};
+    return g;
+}
+template<> inline const GUID& __mingw_uuidof<TextEditor>()
+{
+    static const GUID g = {0x2EF2C6E3u, 0x5352u, 0x41C1u, {0x89, 0xD0, 0x1C, 0x7F, 0x7F, 0x99, 0x35, 0x9B}};
+    return g;
+}
+#endif

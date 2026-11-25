@@ -33,21 +33,21 @@ class DECLSPEC_UUID("4327AC14-3172-4807-BF40-02C7475A2520") RenderTarget
 public:
     virtual ~RenderTarget() {};
 
-    virtual void BeginDraw() = NULL;
-    virtual void EndDraw() = NULL;
-    virtual void Clear(UINT32 color) = NULL;
-    virtual void Resize(UINT width, UINT height) = NULL;
-    virtual void UpdateMonitor() = NULL;
+    virtual void BeginDraw() = 0;
+    virtual void EndDraw() = 0;
+    virtual void Clear(UINT32 color) = 0;
+    virtual void Resize(UINT width, UINT height) = 0;
+    virtual void UpdateMonitor() = 0;
 
-    virtual void SetTransform(DWRITE_MATRIX const& transform) = NULL;
-    virtual void GetTransform(DWRITE_MATRIX& transform) = NULL;
-    virtual void SetAntialiasing(bool isEnabled) = NULL;
+    virtual void SetTransform(DWRITE_MATRIX const& transform) = 0;
+    virtual void GetTransform(DWRITE_MATRIX& transform) = 0;
+    virtual void SetAntialiasing(bool isEnabled) = 0;
 
 
     virtual void DrawTextLayout(
         IDWriteTextLayout* textLayout,
         const RectF& rect
-        ) = NULL;
+        ) = 0;
 
     // Draws a single image, from the given coordinates, to the given coordinates.
     // If the height and width differ, they will be scaled, but mirroring must be
@@ -56,12 +56,12 @@ public:
         IWICBitmapSource* image,
         const RectF& sourceRect,  // where in source atlas texture
         const RectF& destRect     // where on display to draw it
-        ) = NULL;
+        ) = 0;
 
     virtual void FillRectangle(
         const RectF& destRect,
         const DrawingEffect& drawingEffect
-        ) = NULL;
+        ) = 0;
 
 protected:
     // This context is not persisted, only existing on the stack as it
@@ -254,7 +254,7 @@ public:
 
     virtual void SetTransform(DWRITE_MATRIX const& transform);
     virtual void GetTransform(DWRITE_MATRIX& transform);
-    virtual void SetAntialiasing(bool isEnabled) {}
+    virtual void SetAntialiasing(bool isEnabled) { (void)isEnabled; }
 
     virtual void DrawTextLayout(
         IDWriteTextLayout* textLayout,

@@ -301,7 +301,7 @@ LRESULT CALLBACK TextEditor::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
     case WM_ERASEBKGND: // don't want flicker
         return true;
     case WM_DESTROY:
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, NULL);
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
         break;
 
     case WM_NCDESTROY:
@@ -342,7 +342,10 @@ LRESULT CALLBACK TextEditor::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
 
             RectF caretRect;
             window->GetCaretRect(caretRect);
-            POINT pt{ caretRect.left+pageTransform.dx, caretRect.top+pageTransform.dy };
+            POINT pt{
+                static_cast<LONG>(caretRect.left + pageTransform.dx),
+                static_cast<LONG>(caretRect.top + pageTransform.dy)
+            };
             
             COMPOSITIONFORM comp{};
             comp.dwStyle = CFS_FORCE_POSITION;
@@ -355,6 +358,7 @@ LRESULT CALLBACK TextEditor::WindowProc(HWND hwnd, UINT message, WPARAM wParam, 
             ImmReleaseContext(hwnd, himc);
         }
     }
+    [[fallthrough]];
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
     case WM_MBUTTONUP:
@@ -580,7 +584,8 @@ void TextEditor::OnScroll(UINT message, UINT request)
 {
     // Reacts to scroll bar changes.
 
-    SCROLLINFO scrollInfo = {sizeof(scrollInfo)};
+    SCROLLINFO scrollInfo = {};
+    scrollInfo.cbSize = sizeof(scrollInfo);
     scrollInfo.fMask = SIF_ALL;
  
     int barOrientation = (message == WM_VSCROLL) ? SB_VERT : SB_HORZ;
@@ -663,8 +668,9 @@ void TextEditor::UpdateScrollInfo()
     float y = originY_;
     D2D1_POINT_2F pageSize = GetPageSize(textLayout_);
 
-    SCROLLINFO scrollInfo = {sizeof(scrollInfo)};
-    scrollInfo.fMask    = SIF_PAGE|SIF_POS|SIF_RANGE;
+    SCROLLINFO scrollInfo = {};
+    scrollInfo.cbSize = sizeof(scrollInfo);
+    scrollInfo.fMask  = SIF_PAGE|SIF_POS|SIF_RANGE;
 
     if (IsLandscapeAngle(angle_))
     {
@@ -726,7 +732,7 @@ void TextEditor::OnMousePress(UINT message, float x, float y)
 }
 
 
-void TextEditor::OnMouseRelease(UINT message, float x, float y)
+void TextEditor::OnMouseRelease(UINT message, float x, float /*y*/)
 {
     MirrorXCoordinate(x);
 
@@ -1412,7 +1418,7 @@ bool TextEditor::SetSelection(SetSelectionMode moveMode, UINT32 advance, bool ex
     case SetSelectionModeAll:
         caretAnchor_ = 0;
         extendSelection = true;
-        __fallthrough;
+        [[fallthrough]];
 
     case SetSelectionModeLast:
         caretPosition_       = UINT32_MAX;
@@ -1815,7 +1821,12 @@ void TextEditor::GetViewMatrix(OUT DWRITE_MATRIX* matrix) const
     resultA._31 = floor(resultA._31);
     resultA._32 = floor(resultA._32);
 
-    *matrix = *reinterpret_cast<DWRITE_MATRIX*>(&resultA);
+    matrix->m11 = resultA.m11;
+    matrix->m12 = resultA.m12;
+    matrix->m21 = resultA.m21;
+    matrix->m22 = resultA.m22;
+    matrix->dx  = resultA.dx;
+    matrix->dy  = resultA.dy;
 }
 
 
