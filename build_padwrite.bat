@@ -10,7 +10,7 @@ rem  Pass "run" as any argument to launch the executable after a successful buil
 rem ===========================================================================
 setlocal enabledelayedexpansion
 
-set "MINGW=C:\Users\pr30565\Nim_code\mingw64\bin"
+set "MINGW=%USERPROFILE%\Nim_code\mingw64\bin"
 set "GXX=%MINGW%\g++.exe"
 set "WINDRES=%MINGW%\windres.exe"
 set "HERE=%~dp0"

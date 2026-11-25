@@ -48,7 +48,7 @@ Open `PadWrite.sln` or `PadWrite.vcxproj` in Visual Studio and build the desired
 The provided script is configured for the local MinGW-w64 installation at:
 
 ```bat
-C:\Users\pr30565\Nim_code\mingw64\bin
+%USERPROFILE%\Nim_code\mingw64\bin
 ```
 
 Build from the repository root:
